@@ -50,3 +50,10 @@ func (s *MemoryStore) DeleteMovement(id string) error {
 	delete(s.movements, id)
 	return nil
 }
+
+func (s *MemoryStore) RollbackMovement(id string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.movements, id)
+	return nil
+}

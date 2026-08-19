@@ -60,3 +60,10 @@ func (s *MemoryStore) DeleteBatch(id string) error {
 	delete(s.batches, id)
 	return nil
 }
+
+func (s *MemoryStore) RollbackBatch(id string) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	delete(s.batches, id)
+	return nil
+}

@@ -26,6 +26,16 @@ func (s *Service) StockInbound(inboundID string) (*model.InboundOrder, error) {
 		return nil, model.NewValidationError("inspection", "质检不合格，不能入库")
 	}
 	now := time.Now()
+	var createdBatches []string
+	var createdMovements []string
+	rollback := func() {
+		for _, id := range createdMovements {
+			_ = s.store.RollbackMovement(id)
+		}
+		for _, id := range createdBatches {
+			_ = s.store.RollbackBatch(id)
+		}
+	}
 	for _, item := range inbound.Items {
 		batch := &model.InventoryBatch{
 			ID:             idgen.Hex(),
@@ -37,8 +47,10 @@ func (s *Service) StockInbound(inboundID string) (*model.InboundOrder, error) {
 			CreatedAt:      now,
 		}
 		if err := s.store.CreateBatch(batch); err != nil {
+			rollback()
 			return nil, err
 		}
+		createdBatches = append(createdBatches, batch.ID)
 		movement := &model.StockMovement{
 			ID:        idgen.Hex(),
 			ProductID: item.ProductID,
@@ -49,8 +61,10 @@ func (s *Service) StockInbound(inboundID string) (*model.InboundOrder, error) {
 			CreatedAt: now,
 		}
 		if err := s.store.CreateMovement(movement); err != nil {
+			rollback()
 			return nil, err
 		}
+		createdMovements = append(createdMovements, movement.ID)
 	}
 	inbound.Status = model.InboundStocked
 	inbound.UpdatedAt = now

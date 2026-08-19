@@ -53,12 +53,14 @@ type Store interface {
 	ListBatchesByProduct(productID string) []*model.InventoryBatch
 	UpdateBatch(b *model.InventoryBatch) error
 	DeleteBatch(id string) error
+	RollbackBatch(id string) error
 
 	CreateMovement(m *model.StockMovement) error
 	GetMovement(id string) (*model.StockMovement, error)
 	ListMovements() []*model.StockMovement
 	ListMovementsByProduct(productID string) []*model.StockMovement
 	DeleteMovement(id string) error
+	RollbackMovement(id string) error
 
 	CreateReturnOrder(r *model.ReturnOrder) error
 	GetReturnOrder(id string) (*model.ReturnOrder, error)
