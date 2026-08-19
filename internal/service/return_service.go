@@ -30,8 +30,17 @@ func (s *Service) CreateReturnOrder(inboundOrderID, productID string, quantity i
 	if !found {
 		return nil, model.NewValidationError("product_id", "退货商品不属于该入库单")
 	}
-	if quantity > maxQty {
-		return nil, model.NewValidationError("quantity", "退货数量超过入库数量")
+	// 已占用数量：同一入库单、同一商品上已有退货单（含待处理与已完成）的数量之和。
+	// 待处理退货虽尚未实际扣减库存，但已占用可退额度，必须一并计入；否则同一入库单
+	// 可先后建出多张退货单、累计超出入库数量，直到完成第二张时才报「库存不足」。
+	occupied := 0
+	for _, r := range s.store.ListReturnOrdersByInbound(inboundOrderID) {
+		if r.ProductID == productID {
+			occupied += r.Quantity
+		}
+	}
+	if quantity+occupied > maxQty {
+		return nil, model.NewValidationError("quantity", "退货数量超过可退数量")
 	}
 	ret := &model.ReturnOrder{
 		ID:             idgen.Hex(),
