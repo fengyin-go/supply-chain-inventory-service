@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"supplychain/internal/model"
+	"supplychain/internal/store"
 	"supplychain/pkg/idgen"
 )
 
@@ -16,10 +17,6 @@ func (s *Service) CreateInboundOrder(purchaseOrderID string) (*model.InboundOrde
 	}
 	if po.Status != model.POStatusConfirmed {
 		return nil, model.NewValidationError("purchase_order_id", "仅已确认的采购单可创建入库单")
-	}
-	// 同一采购单不可重复入库
-	if existing := s.store.ListInboundOrdersByPurchaseOrder(purchaseOrderID); len(existing) > 0 {
-		return nil, model.NewValidationError("purchase_order_id", "该采购单已存在入库单")
 	}
 	inbound := &model.InboundOrder{
 		ID:              idgen.Hex(),
@@ -35,7 +32,10 @@ func (s *Service) CreateInboundOrder(purchaseOrderID string) (*model.InboundOrde
 	if err := inbound.Validate(); err != nil {
 		return nil, err
 	}
-	if err := s.store.CreateInboundOrder(inbound); err != nil {
+	if err := s.store.CreateInboundOrderIfAbsent(inbound); err != nil {
+		if err == store.ErrConflict {
+			return nil, model.NewValidationError("purchase_order_id", "该采购单已存在入库单")
+		}
 		return nil, err
 	}
 	return inbound, nil

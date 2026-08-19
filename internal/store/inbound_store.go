@@ -14,6 +14,21 @@ func (s *MemoryStore) CreateInboundOrder(i *model.InboundOrder) error {
 	return nil
 }
 
+func (s *MemoryStore) CreateInboundOrderIfAbsent(i *model.InboundOrder) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	for _, exist := range s.inbounds {
+		if exist.BelongsToPurchaseOrder(i.PurchaseOrderID) {
+			return ErrConflict
+		}
+		if exist.InboundNo == i.InboundNo {
+			return ErrConflict
+		}
+	}
+	s.inbounds[i.ID] = i
+	return nil
+}
+
 func (s *MemoryStore) GetInboundOrder(id string) (*model.InboundOrder, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

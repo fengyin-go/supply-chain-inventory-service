@@ -34,6 +34,7 @@ type Store interface {
 	DeletePurchaseOrder(id string) error
 
 	CreateInboundOrder(i *model.InboundOrder) error
+	CreateInboundOrderIfAbsent(i *model.InboundOrder) error
 	GetInboundOrder(id string) (*model.InboundOrder, error)
 	ListInboundOrders() []*model.InboundOrder
 	ListInboundOrdersByPurchaseOrder(poID string) []*model.InboundOrder

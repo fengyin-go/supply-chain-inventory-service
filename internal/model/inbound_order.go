@@ -40,6 +40,10 @@ type InboundOrder struct {
 	UpdatedAt       time.Time      `json:"updated_at"`
 }
 
+func (i *InboundOrder) BelongsToPurchaseOrder(id string) bool {
+	return i != nil && i.PurchaseOrderID == id
+}
+
 func (i *InboundOrder) Validate() error {
 	i.InboundNo = strings.TrimSpace(i.InboundNo)
 	i.PurchaseOrderID = strings.TrimSpace(i.PurchaseOrderID)
