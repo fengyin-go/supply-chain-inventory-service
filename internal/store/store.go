@@ -51,6 +51,7 @@ type Store interface {
 	GetBatch(id string) (*model.InventoryBatch, error)
 	ListBatches() []*model.InventoryBatch
 	ListBatchesByProduct(productID string) []*model.InventoryBatch
+	ListBatchesForOutbound(productID string) []*model.InventoryBatch
 	UpdateBatch(b *model.InventoryBatch) error
 	DeleteBatch(id string) error
 

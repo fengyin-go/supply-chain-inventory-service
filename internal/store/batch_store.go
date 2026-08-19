@@ -41,6 +41,19 @@ func (s *MemoryStore) ListBatchesByProduct(productID string) []*model.InventoryB
 	return list
 }
 
+func (s *MemoryStore) ListBatchesForOutbound(productID string) []*model.InventoryBatch {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	list := make([]*model.InventoryBatch, 0)
+	for _, b := range s.batches {
+		if b.ProductID == productID {
+			cp := *b
+			list = append(list, &cp)
+		}
+	}
+	return list
+}
+
 func (s *MemoryStore) UpdateBatch(b *model.InventoryBatch) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

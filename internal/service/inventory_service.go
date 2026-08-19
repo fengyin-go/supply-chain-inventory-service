@@ -84,10 +84,12 @@ func (s *Service) GetStock(productID string) (int, error) {
 
 // OutboundStock 出库：按先进先出扣减批次库存，并记录出库流水。
 func (s *Service) OutboundStock(productID string, quantity int, note string) error {
+	s.stockMu.Lock()
+	defer s.stockMu.Unlock()
 	if quantity <= 0 {
 		return model.NewValidationError("quantity", "出库数量必须大于 0")
 	}
-	batches := s.store.ListBatchesByProduct(productID)
+	batches := s.store.ListBatchesForOutbound(productID)
 	sort.Slice(batches, func(i, j int) bool {
 		return batches[i].CreatedAt.Before(batches[j].CreatedAt)
 	})
