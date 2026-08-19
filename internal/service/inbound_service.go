@@ -26,7 +26,7 @@ func (s *Service) CreateInboundOrder(purchaseOrderID string) (*model.InboundOrde
 		InboundNo:       generateNo("IN"),
 		PurchaseOrderID: po.ID,
 		SupplierID:      po.SupplierID,
-		Items:           po.Items,
+		Items:           model.CopyPurchaseItems(po.Items),
 		TotalAmount:     po.TotalAmount,
 		Status:          model.InboundPending,
 		CreatedAt:       time.Now(),

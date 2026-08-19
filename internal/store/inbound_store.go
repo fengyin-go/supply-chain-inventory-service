@@ -10,7 +10,7 @@ func (s *MemoryStore) CreateInboundOrder(i *model.InboundOrder) error {
 			return ErrConflict
 		}
 	}
-	s.inbounds[i.ID] = i
+	s.inbounds[i.ID] = model.CopyInboundOrder(i)
 	return nil
 }
 
@@ -21,7 +21,7 @@ func (s *MemoryStore) GetInboundOrder(id string) (*model.InboundOrder, error) {
 	if !ok {
 		return nil, ErrNotFound
 	}
-	return i, nil
+	return model.CopyInboundOrder(i), nil
 }
 
 func (s *MemoryStore) ListInboundOrders() []*model.InboundOrder {
@@ -29,7 +29,7 @@ func (s *MemoryStore) ListInboundOrders() []*model.InboundOrder {
 	defer s.mu.RUnlock()
 	list := make([]*model.InboundOrder, 0, len(s.inbounds))
 	for _, i := range s.inbounds {
-		list = append(list, i)
+		list = append(list, model.CopyInboundOrder(i))
 	}
 	return list
 }
@@ -40,7 +40,7 @@ func (s *MemoryStore) ListInboundOrdersByPurchaseOrder(poID string) []*model.Inb
 	list := make([]*model.InboundOrder, 0)
 	for _, i := range s.inbounds {
 		if i.PurchaseOrderID == poID {
-			list = append(list, i)
+			list = append(list, model.CopyInboundOrder(i))
 		}
 	}
 	return list
@@ -57,7 +57,7 @@ func (s *MemoryStore) UpdateInboundOrder(i *model.InboundOrder) error {
 			return ErrConflict
 		}
 	}
-	s.inbounds[i.ID] = i
+	s.inbounds[i.ID] = model.CopyInboundOrder(i)
 	return nil
 }
 

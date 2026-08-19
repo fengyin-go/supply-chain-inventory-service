@@ -10,7 +10,7 @@ func (s *MemoryStore) CreatePurchaseOrder(p *model.PurchaseOrder) error {
 			return ErrConflict
 		}
 	}
-	s.pos[p.ID] = p
+	s.pos[p.ID] = model.CopyPurchaseOrder(p)
 	return nil
 }
 
@@ -21,7 +21,7 @@ func (s *MemoryStore) GetPurchaseOrder(id string) (*model.PurchaseOrder, error) 
 	if !ok {
 		return nil, ErrNotFound
 	}
-	return p, nil
+	return model.CopyPurchaseOrder(p), nil
 }
 
 func (s *MemoryStore) ListPurchaseOrders() []*model.PurchaseOrder {
@@ -29,7 +29,7 @@ func (s *MemoryStore) ListPurchaseOrders() []*model.PurchaseOrder {
 	defer s.mu.RUnlock()
 	list := make([]*model.PurchaseOrder, 0, len(s.pos))
 	for _, p := range s.pos {
-		list = append(list, p)
+		list = append(list, model.CopyPurchaseOrder(p))
 	}
 	return list
 }
@@ -45,7 +45,7 @@ func (s *MemoryStore) UpdatePurchaseOrder(p *model.PurchaseOrder) error {
 			return ErrConflict
 		}
 	}
-	s.pos[p.ID] = p
+	s.pos[p.ID] = model.CopyPurchaseOrder(p)
 	return nil
 }
 
