@@ -41,6 +41,7 @@ type Store interface {
 	DeleteInboundOrder(id string) error
 
 	CreateInspection(i *model.Inspection) error
+	CreateInspectionAndUpdateInbound(i *model.Inspection, inbound *model.InboundOrder) error
 	GetInspection(id string) (*model.Inspection, error)
 	ListInspections() []*model.Inspection
 	GetInspectionByInbound(inboundID string) (*model.Inspection, error)

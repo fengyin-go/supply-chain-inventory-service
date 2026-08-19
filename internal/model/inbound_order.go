@@ -73,6 +73,11 @@ func (i *InboundOrder) Validate() error {
 	return nil
 }
 
+func (i *InboundOrder) StartInspection(now time.Time) {
+	i.Status = InboundInspecting
+	i.UpdatedAt = now
+}
+
 func validInboundStatus(s string) bool {
 	switch s {
 	case InboundPending, InboundInspecting, InboundStocked, InboundRejected:

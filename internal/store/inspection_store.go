@@ -9,6 +9,18 @@ func (s *MemoryStore) CreateInspection(i *model.Inspection) error {
 	return nil
 }
 
+func (s *MemoryStore) CreateInspectionAndUpdateInbound(i *model.Inspection, inbound *model.InboundOrder) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.inbounds[inbound.ID]; !ok {
+		return ErrNotFound
+	}
+	inbound.StartInspection(i.UpdatedAt)
+	s.inbounds[inbound.ID] = inbound
+	s.inspections[i.ID] = i
+	return nil
+}
+
 func (s *MemoryStore) GetInspection(id string) (*model.Inspection, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

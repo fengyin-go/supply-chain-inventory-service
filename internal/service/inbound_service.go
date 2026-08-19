@@ -68,25 +68,23 @@ func (s *Service) StartInspection(inboundID, inspector string) (*model.Inspectio
 	if !model.CanTransitionInbound(inbound.Status, model.InboundInspecting) {
 		return nil, model.NewValidationError("status", "当前状态不可开始质检")
 	}
-	inbound.Status = model.InboundInspecting
-	inbound.UpdatedAt = time.Now()
-	if err := s.store.UpdateInboundOrder(inbound); err != nil {
-		return nil, err
-	}
+	now := time.Now()
 	ins := &model.Inspection{
 		ID:             idgen.Hex(),
 		InboundOrderID: inboundID,
 		Inspector:      inspector,
 		Result:         model.InspectionPending,
-		CreatedAt:      time.Now(),
-		UpdatedAt:      time.Now(),
+		CreatedAt:      now,
+		UpdatedAt:      now,
 	}
 	if err := ins.Validate(); err != nil {
 		return nil, err
 	}
-	if err := s.store.CreateInspection(ins); err != nil {
+	if err := s.store.CreateInspectionAndUpdateInbound(ins, inbound); err != nil {
 		return nil, err
 	}
+	inbound.Status = model.InboundInspecting
+	inbound.UpdatedAt = now
 	return ins, nil
 }
 
