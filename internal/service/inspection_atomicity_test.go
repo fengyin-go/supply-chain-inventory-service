@@ -18,6 +18,10 @@ func (s *inspectionCreateFailureStore) CreateInspection(i *model.Inspection) err
 	return errors.New("inspection writer unavailable")
 }
 
+func (s *inspectionCreateFailureStore) CreateInspectionAndUpdateInbound(i *model.Inspection, in *model.InboundOrder) error {
+	return errors.New("inspection writer unavailable")
+}
+
 func TestStartInspectionDoesNotLeaveInboundHalfUpdated(t *testing.T) {
 	base := store.NewMemoryStore()
 	svc := New(&inspectionCreateFailureStore{Store: base}, logger.NewLevel(logger.LevelError), &config.Config{MaxPageSize: 100})
