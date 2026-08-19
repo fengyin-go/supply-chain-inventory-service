@@ -46,6 +46,18 @@ func (s *MemoryStore) ListReturnOrdersByInbound(inboundID string) []*model.Retur
 	return list
 }
 
+func (s *MemoryStore) SumReservedReturnQuantity(inboundID, productID string) int {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	total := 0
+	for _, r := range s.returns {
+		if r.ReservesProduct(inboundID, productID) {
+			total += r.Quantity
+		}
+	}
+	return total
+}
+
 func (s *MemoryStore) UpdateReturnOrder(r *model.ReturnOrder) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

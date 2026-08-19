@@ -30,7 +30,8 @@ func (s *Service) CreateReturnOrder(inboundOrderID, productID string, quantity i
 	if !found {
 		return nil, model.NewValidationError("product_id", "退货商品不属于该入库单")
 	}
-	if quantity > maxQty {
+	reserved := s.store.SumReservedReturnQuantity(inboundOrderID, productID)
+	if quantity > maxQty-reserved {
 		return nil, model.NewValidationError("quantity", "退货数量超过入库数量")
 	}
 	ret := &model.ReturnOrder{

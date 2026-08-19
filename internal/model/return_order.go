@@ -37,6 +37,11 @@ type ReturnOrder struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+func (r *ReturnOrder) ReservesProduct(inboundID, productID string) bool {
+	return r != nil && r.InboundOrderID == inboundID && r.ProductID == productID &&
+		(r.Status == ReturnPending || r.Status == ReturnCompleted)
+}
+
 func (r *ReturnOrder) Validate() error {
 	r.ReturnNo = strings.TrimSpace(r.ReturnNo)
 	r.InboundOrderID = strings.TrimSpace(r.InboundOrderID)
