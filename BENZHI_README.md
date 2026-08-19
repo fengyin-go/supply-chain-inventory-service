@@ -1,4 +1,4 @@
-# supply-chain-inventory-service
+# supply-chain-inventory-service__001
 
 ## 构建镜像
 
