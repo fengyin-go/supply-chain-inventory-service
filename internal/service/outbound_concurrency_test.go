@@ -61,7 +61,11 @@ func TestConcurrentOutboundCannotOversellBatch(t *testing.T) {
 	if successes != 1 {
 		t.Fatalf("outbound successes = %d, want 1", successes)
 	}
-	stock, _ := svc.GetStock(product.ID)
+	batches := base.ListBatchesByProduct(product.ID)
+	stock := 0
+	for _, batch := range batches {
+		stock += batch.Remaining
+	}
 	if stock != 2 {
 		t.Fatalf("stock after concurrent outbound = %d, want 2", stock)
 	}
