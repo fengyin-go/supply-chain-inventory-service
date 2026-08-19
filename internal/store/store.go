@@ -65,5 +65,6 @@ type Store interface {
 	ListReturnOrders() []*model.ReturnOrder
 	ListReturnOrdersByInbound(inboundID string) []*model.ReturnOrder
 	UpdateReturnOrder(r *model.ReturnOrder) error
+	CommitReturnCompletion(r *model.ReturnOrder) error
 	DeleteReturnOrder(id string) error
 }

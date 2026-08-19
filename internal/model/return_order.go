@@ -37,6 +37,11 @@ type ReturnOrder struct {
 	UpdatedAt      time.Time `json:"updated_at"`
 }
 
+func (r *ReturnOrder) MarkCompleted(now time.Time) {
+	r.Status = ReturnCompleted
+	r.UpdatedAt = now
+}
+
 func (r *ReturnOrder) Validate() error {
 	r.ReturnNo = strings.TrimSpace(r.ReturnNo)
 	r.InboundOrderID = strings.TrimSpace(r.InboundOrderID)

@@ -56,6 +56,19 @@ func (s *MemoryStore) UpdateReturnOrder(r *model.ReturnOrder) error {
 	return nil
 }
 
+func (s *MemoryStore) CommitReturnCompletion(r *model.ReturnOrder) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if _, ok := s.returns[r.ID]; !ok {
+		return ErrNotFound
+	}
+	if r.Status != model.ReturnCompleted {
+		return ErrConflict
+	}
+	s.returns[r.ID] = r
+	return nil
+}
+
 func (s *MemoryStore) DeleteReturnOrder(id string) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()

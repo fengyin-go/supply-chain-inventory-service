@@ -80,15 +80,17 @@ func (s *Service) CompleteReturnOrder(id string) (*model.ReturnOrder, error) {
 	if !model.CanTransitionReturn(ret.Status, model.ReturnCompleted) {
 		return nil, model.NewValidationError("status", "当前状态不可完成退货")
 	}
-	// 扣减库存（先进先出）
+	now := time.Now()
+	candidate := *ret
+	candidate.MarkCompleted(now)
+	if err := s.store.CommitReturnCompletion(&candidate); err != nil {
+		return nil, err
+	}
 	if err := s.OutboundStock(ret.ProductID, ret.Quantity, "退货:"+ret.ReturnNo); err != nil {
+		_ = s.store.UpdateReturnOrder(ret)
 		return nil, err
 	}
-	ret.Status = model.ReturnCompleted
-	ret.UpdatedAt = time.Now()
-	if err := s.store.UpdateReturnOrder(ret); err != nil {
-		return nil, err
-	}
+	*ret = candidate
 	return ret, nil
 }
 
@@ -98,10 +100,10 @@ func (s *Service) DeleteReturnOrder(id string) error {
 
 // ReturnStats 退货统计。
 type ReturnStats struct {
-	Total          int `json:"total"`
-	Pending        int `json:"pending"`
-	Completed      int `json:"completed"`
-	TotalQuantity  int `json:"total_quantity"`
+	Total         int `json:"total"`
+	Pending       int `json:"pending"`
+	Completed     int `json:"completed"`
+	TotalQuantity int `json:"total_quantity"`
 }
 
 func (s *Service) ReturnStats() (*ReturnStats, error) {
