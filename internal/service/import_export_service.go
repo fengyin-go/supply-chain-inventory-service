@@ -45,11 +45,31 @@ type ExportSnapshot struct {
 
 // Export 导出当前内存中的全量数据。
 func (s *Service) Export() (*ExportSnapshot, error) {
+	suppliers := s.store.ListSuppliers()
+	supplierCopies := make([]*model.Supplier, 0, len(suppliers))
+	for _, item := range suppliers {
+		supplierCopies = append(supplierCopies, item.Snapshot())
+	}
+	products := s.store.ListProducts()
+	productCopies := make([]*model.Product, 0, len(products))
+	for _, item := range products {
+		productCopies = append(productCopies, item.Snapshot())
+	}
+	orders := s.store.ListPurchaseOrders()
+	orderCopies := make([]*model.PurchaseOrder, 0, len(orders))
+	for _, item := range orders {
+		orderCopies = append(orderCopies, item.Snapshot())
+	}
+	inbounds := s.store.ListInboundOrders()
+	inboundCopies := make([]*model.InboundOrder, 0, len(inbounds))
+	for _, item := range inbounds {
+		inboundCopies = append(inboundCopies, item.Snapshot())
+	}
 	return &ExportSnapshot{
-		Suppliers:      s.store.ListSuppliers(),
-		Products:       s.store.ListProducts(),
-		PurchaseOrders: s.store.ListPurchaseOrders(),
-		InboundOrders:  s.store.ListInboundOrders(),
+		Suppliers:      supplierCopies,
+		Products:       productCopies,
+		PurchaseOrders: orderCopies,
+		InboundOrders:  inboundCopies,
 		Inspections:    s.store.ListInspections(),
 		Batches:        s.store.ListBatches(),
 		Movements:      s.store.ListMovements(),

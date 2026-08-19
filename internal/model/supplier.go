@@ -24,6 +24,14 @@ type Supplier struct {
 	UpdatedAt time.Time `json:"updated_at"`
 }
 
+func (s *Supplier) Snapshot() *Supplier {
+	if s == nil {
+		return nil
+	}
+	cp := *s
+	return &cp
+}
+
 var phoneRe = regexp.MustCompile(`^\d{6,15}$`)
 
 func (s *Supplier) Validate() error {

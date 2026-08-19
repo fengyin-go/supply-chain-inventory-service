@@ -18,6 +18,14 @@ type Product struct {
 	UpdatedAt         time.Time `json:"updated_at"`
 }
 
+func (p *Product) Snapshot() *Product {
+	if p == nil {
+		return nil
+	}
+	cp := *p
+	return &cp
+}
+
 func (p *Product) Validate() error {
 	p.SKU = strings.TrimSpace(p.SKU)
 	p.Name = strings.TrimSpace(p.Name)

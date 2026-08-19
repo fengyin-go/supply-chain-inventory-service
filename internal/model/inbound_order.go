@@ -40,6 +40,15 @@ type InboundOrder struct {
 	UpdatedAt       time.Time      `json:"updated_at"`
 }
 
+func (i *InboundOrder) Snapshot() *InboundOrder {
+	if i == nil {
+		return nil
+	}
+	cp := *i
+	cp.Items = append([]PurchaseItem(nil), i.Items...)
+	return &cp
+}
+
 func (i *InboundOrder) Validate() error {
 	i.InboundNo = strings.TrimSpace(i.InboundNo)
 	i.PurchaseOrderID = strings.TrimSpace(i.PurchaseOrderID)

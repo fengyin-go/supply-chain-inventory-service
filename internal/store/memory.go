@@ -8,15 +8,15 @@ import (
 
 // MemoryStore 基于内存的 Store 实现，线程安全。
 type MemoryStore struct {
-	mu         sync.RWMutex
-	suppliers  map[string]*model.Supplier
-	products   map[string]*model.Product
-	pos        map[string]*model.PurchaseOrder
-	inbounds   map[string]*model.InboundOrder
+	mu          sync.RWMutex
+	suppliers   map[string]*model.Supplier
+	products    map[string]*model.Product
+	pos         map[string]*model.PurchaseOrder
+	inbounds    map[string]*model.InboundOrder
 	inspections map[string]*model.Inspection
-	batches    map[string]*model.InventoryBatch
-	movements  map[string]*model.StockMovement
-	returns    map[string]*model.ReturnOrder
+	batches     map[string]*model.InventoryBatch
+	movements   map[string]*model.StockMovement
+	returns     map[string]*model.ReturnOrder
 }
 
 func NewMemoryStore() *MemoryStore {

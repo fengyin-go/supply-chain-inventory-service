@@ -47,6 +47,15 @@ type PurchaseOrder struct {
 	UpdatedAt   time.Time      `json:"updated_at"`
 }
 
+func (p *PurchaseOrder) Snapshot() *PurchaseOrder {
+	if p == nil {
+		return nil
+	}
+	cp := *p
+	cp.Items = append([]PurchaseItem(nil), p.Items...)
+	return &cp
+}
+
 func (p *PurchaseOrder) Validate() error {
 	p.OrderNo = strings.TrimSpace(p.OrderNo)
 	p.SupplierID = strings.TrimSpace(p.SupplierID)
