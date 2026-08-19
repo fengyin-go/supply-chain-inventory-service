@@ -43,16 +43,17 @@ type ExportSnapshot struct {
 	ExportedAt  time.Time               `json:"exported_at"`
 }
 
-// Export 导出当前内存中的全量数据。
+// Export 导出当前内存中的全量数据快照。
+// 返回的是深拷贝副本，调用方对快照的任何修改都不会回写到内存中的原始记录。
 func (s *Service) Export() (*ExportSnapshot, error) {
 	return &ExportSnapshot{
-		Suppliers:      s.store.ListSuppliers(),
-		Products:       s.store.ListProducts(),
-		PurchaseOrders: s.store.ListPurchaseOrders(),
-		InboundOrders:  s.store.ListInboundOrders(),
-		Inspections:    s.store.ListInspections(),
-		Batches:        s.store.ListBatches(),
-		Movements:      s.store.ListMovements(),
+		Suppliers:      model.CloneSlice(s.store.ListSuppliers()),
+		Products:       model.CloneSlice(s.store.ListProducts()),
+		PurchaseOrders: model.CloneSlice(s.store.ListPurchaseOrders()),
+		InboundOrders:  model.CloneSlice(s.store.ListInboundOrders()),
+		Inspections:    model.CloneSlice(s.store.ListInspections()),
+		Batches:        model.CloneSlice(s.store.ListBatches()),
+		Movements:      model.CloneSlice(s.store.ListMovements()),
 		ExportedAt:     time.Now(),
 	}, nil
 }
