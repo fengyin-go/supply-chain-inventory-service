@@ -23,6 +23,13 @@ type StockMovement struct {
 	CreatedAt time.Time `json:"created_at"`
 }
 
+func NewOutboundMovement(id, productID, batchID, note string, quantity int, now time.Time) *StockMovement {
+	return &StockMovement{
+		ID: id, ProductID: productID, BatchID: batchID,
+		Type: MovementOutbound, Delta: -quantity, Note: note, CreatedAt: now,
+	}
+}
+
 func (m *StockMovement) Validate() error {
 	m.ProductID = strings.TrimSpace(m.ProductID)
 	m.Type = strings.TrimSpace(m.Type)

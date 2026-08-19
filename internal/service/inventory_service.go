@@ -115,16 +115,12 @@ func (s *Service) OutboundStock(productID string, quantity int, note string) err
 		if err := s.store.UpdateBatch(b); err != nil {
 			return err
 		}
-		movement := &model.StockMovement{
-			ID:        idgen.Hex(),
-			ProductID: productID,
-			BatchID:   b.ID,
-			Type:      model.MovementOutbound,
-			Delta:     -take,
-			Note:      note,
-			CreatedAt: now,
-		}
+		movement := model.NewOutboundMovement(idgen.Hex(), productID, b.ID, note, take, now)
 		if err := s.store.CreateMovement(movement); err != nil {
+			b.Restore(take)
+			if restoreErr := s.store.UpdateBatch(b); restoreErr != nil {
+				return restoreErr
+			}
 			return err
 		}
 		remaining -= take

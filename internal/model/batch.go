@@ -35,6 +35,10 @@ func (b *InventoryBatch) Validate() error {
 	return nil
 }
 
+func (b *InventoryBatch) Restore(quantity int) {
+	b.Remaining += quantity
+}
+
 // BatchFilter 批次筛选条件。
 type BatchFilter struct {
 	ProductID string

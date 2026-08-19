@@ -47,6 +47,9 @@ func (s *MemoryStore) UpdateBatch(b *model.InventoryBatch) error {
 	if _, ok := s.batches[b.ID]; !ok {
 		return ErrNotFound
 	}
+	if err := b.Validate(); err != nil {
+		return err
+	}
 	s.batches[b.ID] = b
 	return nil
 }
