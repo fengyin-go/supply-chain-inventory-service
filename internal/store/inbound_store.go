@@ -24,6 +24,16 @@ func (s *MemoryStore) GetInboundOrder(id string) (*model.InboundOrder, error) {
 	return i, nil
 }
 
+func (s *MemoryStore) GetInboundOrderForStock(id string) (*model.InboundOrder, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
+	inbound, ok := s.inbounds[id]
+	if !ok {
+		return nil, ErrNotFound
+	}
+	return inbound, nil
+}
+
 func (s *MemoryStore) ListInboundOrders() []*model.InboundOrder {
 	s.mu.RLock()
 	defer s.mu.RUnlock()

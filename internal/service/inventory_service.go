@@ -11,7 +11,9 @@ import (
 // StockInbound 入库：质检合格后，将质检中的入库单转为已入库，
 // 并生成库存批次与入库流水，同时将采购单标记为已收货。
 func (s *Service) StockInbound(inboundID string) (*model.InboundOrder, error) {
-	inbound, err := s.store.GetInboundOrder(inboundID)
+	s.inboundMu.Lock()
+	defer s.inboundMu.Unlock()
+	inbound, err := s.store.GetInboundOrderForStock(inboundID)
 	if err != nil {
 		return nil, err
 	}

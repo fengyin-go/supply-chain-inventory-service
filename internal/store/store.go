@@ -35,6 +35,7 @@ type Store interface {
 
 	CreateInboundOrder(i *model.InboundOrder) error
 	GetInboundOrder(id string) (*model.InboundOrder, error)
+	GetInboundOrderForStock(id string) (*model.InboundOrder, error)
 	ListInboundOrders() []*model.InboundOrder
 	ListInboundOrdersByPurchaseOrder(poID string) []*model.InboundOrder
 	UpdateInboundOrder(i *model.InboundOrder) error
