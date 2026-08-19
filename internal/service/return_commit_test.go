@@ -16,6 +16,10 @@ func (s *returnUpdateFailureStore) UpdateReturnOrder(r *model.ReturnOrder) error
 	return errors.New("return writer unavailable")
 }
 
+func (s *returnUpdateFailureStore) CommitReturnCompletion(r *model.ReturnOrder) error {
+	return errors.New("return writer unavailable")
+}
+
 func TestFailedReturnCommitDoesNotConsumeStock(t *testing.T) {
 	svc := New(&returnUpdateFailureStore{Store: store.NewMemoryStore()}, testLogger(), testConfig())
 	_, product, po := setupConfirmedPO(t, svc)
