@@ -1,22 +1,28 @@
 package service
 
 import (
+	"errors"
 	"sort"
 	"time"
 
 	"supplychain/internal/model"
+	"supplychain/internal/store"
 	"supplychain/pkg/idgen"
 )
 
 // StockInbound 入库：质检合格后，将质检中的入库单转为已入库，
 // 并生成库存批次与入库流水，同时将采购单标记为已收货。
+//
+// 并发安全：同一张入库单的两次记账请求会同时读到「质检中」状态。为避免两边
+// 各自生成批次与流水导致重复入库，这里用 TransitionInboundStatus 在 store 层
+// 原子地完成「状态仍是质检中 → 置为已入库」的占位：只有先到的那次能成功，后到
+// 的一次因状态已被改掉拿到 ErrConflict 而直接返回，不会进入批次/流水创建逻辑。
 func (s *Service) StockInbound(inboundID string) (*model.InboundOrder, error) {
-	inbound, err := s.store.GetInboundOrder(inboundID)
-	if err != nil {
+	// 仅校验入库单是否存在：缺失时由 store 返回 ErrNotFound，交由上层映射为 404。
+	// 这里不读取/依赖返回的入库单状态做判定，避免与并发的状态写入产生数据竞争；
+	// 状态判定统一交给下面的原子占位完成。
+	if _, err := s.store.GetInboundOrder(inboundID); err != nil {
 		return nil, err
-	}
-	if inbound.Status != model.InboundInspecting {
-		return nil, model.NewValidationError("status", "仅质检中的入库单可入库")
 	}
 	ins, err := s.store.GetInspectionByInbound(inboundID)
 	if err != nil {
@@ -24,6 +30,15 @@ func (s *Service) StockInbound(inboundID string) (*model.InboundOrder, error) {
 	}
 	if ins.Result != model.InspectionPassed {
 		return nil, model.NewValidationError("inspection", "质检不合格，不能入库")
+	}
+	// 原子占位：质检中 → 已入库。返回的 inbound 已是占位成功后的最新值，
+	// 后续批次/流水创建只读其 Items 等创建后不变的字段，不再触碰 Status。
+	inbound, err := s.store.TransitionInboundStatus(inboundID, model.InboundInspecting, model.InboundStocked)
+	if err != nil {
+		if errors.Is(err, store.ErrConflict) {
+			return nil, model.NewValidationError("status", "该入库单已入库，请勿重复入库")
+		}
+		return nil, err
 	}
 	now := time.Now()
 	for _, item := range inbound.Items {
@@ -51,11 +66,6 @@ func (s *Service) StockInbound(inboundID string) (*model.InboundOrder, error) {
 		if err := s.store.CreateMovement(movement); err != nil {
 			return nil, err
 		}
-	}
-	inbound.Status = model.InboundStocked
-	inbound.UpdatedAt = now
-	if err := s.store.UpdateInboundOrder(inbound); err != nil {
-		return nil, err
 	}
 	if err := s.receivePurchaseOrder(inbound.PurchaseOrderID); err != nil {
 		return nil, err

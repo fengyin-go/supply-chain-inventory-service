@@ -39,6 +39,10 @@ type Store interface {
 	ListInboundOrdersByPurchaseOrder(poID string) []*model.InboundOrder
 	UpdateInboundOrder(i *model.InboundOrder) error
 	DeleteInboundOrder(id string) error
+	// TransitionInboundStatus 原子地比较并流转入库单状态：仅当当前状态等于 from 时
+	// 才更新为 to 并返回更新后的入库单；状态已被并发改掉则返回 ErrConflict，
+	// 供调用方识别重复/并发请求，避免 check-then-act 竞态。
+	TransitionInboundStatus(id string, from, to string) (*model.InboundOrder, error)
 
 	CreateInspection(i *model.Inspection) error
 	GetInspection(id string) (*model.Inspection, error)
