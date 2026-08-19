@@ -41,7 +41,7 @@ func TestMovementStats(t *testing.T) {
 	s.StockInbound(inbound.ID) // 入库流水 +20
 
 	s.OutboundStock(p.ID, 5, "出库") // 出库流水 -5
-	s.AdjustStock(p.ID, -2, "损耗")   // 调整流水 -2
+	s.AdjustStock(p.ID, -2, "损耗")  // 调整流水 -2
 
 	stats, err := s.MovementStats()
 	if err != nil {
